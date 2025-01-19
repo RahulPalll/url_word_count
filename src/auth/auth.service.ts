@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Users } from './entities/user.entity';
@@ -14,30 +18,55 @@ export class AuthService {
   ) {}
 
   async register(username: string, password: string): Promise<any> {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({
-      username,
-      password: hashedPassword,
-    });
-    await this.userRepository.save(user);
-    return { message: 'User registered successfully' };
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: { username },
+      });
+      if (existingUser) {
+        throw new BadRequestException('Username is already taken.');
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = this.userRepository.create({
+        username,
+        password: hashedPassword,
+      });
+      await this.userRepository.save(user);
+      return { message: 'User registered successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Registration failed.');
+    }
   }
 
   async validateUser(
     username: string,
     password: string,
   ): Promise<Users | null> {
-    const user = await this.userRepository.findOne({ where: { username } });
-    if (user && (await bcrypt.compare(password, user.password))) {
+    try {
+      const user = await this.userRepository.findOne({ where: { username } });
+      if (!user) {
+        throw new UnauthorizedException('Invalid username or password.');
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid username or password.');
+      }
+
       return user;
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Validation failed.');
     }
-    return null;
   }
 
   async login(users: Users): Promise<{ accessToken: string }> {
-    const payload = { username: users.username, sub: users.id };
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
+    try {
+      const payload = { username: users.username, sub: users.id };
+      return {
+        accessToken: this.jwtService.sign(payload),
+      };
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Login failed.');
+    }
   }
 }

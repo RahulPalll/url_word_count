@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from './entities/article.entity';
@@ -16,15 +16,21 @@ export class ArticleService {
   ) {}
 
   async processArticles(urls: string[]): Promise<void> {
-    const results = [];
-    const queue = urls.slice();
+    try {
+      const results = [];
+      const queue = urls.slice();
 
-    const workers = Array(this.concurrency)
-      .fill(null)
-      .map(() => this.worker(queue, results));
+      const workers = Array(this.concurrency)
+        .fill(null)
+        .map(() => this.worker(queue, results));
 
-    await Promise.all(workers);
-    await this.saveResults(results);
+      await Promise.all(workers);
+      await this.saveResults(results);
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to process articles.',
+      );
+    }
   }
 
   private async worker(
@@ -57,8 +63,12 @@ export class ArticleService {
   private async saveResults(
     results: { url: string; wordCount: number }[],
   ): Promise<void> {
-    const content = results.map((r) => `${r.url}, ${r.wordCount}`).join('\n');
-    await fs.writeFile('results.txt', content);
-    this.logger.log('Results saved to results.txt');
+    try {
+      const content = results.map((r) => `${r.url}, ${r.wordCount}`).join('\n');
+      await fs.writeFile('results.txt', content);
+      this.logger.log('Results saved to results.txt');
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to save results.');
+    }
   }
 }

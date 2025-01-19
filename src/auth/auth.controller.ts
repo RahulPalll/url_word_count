@@ -1,4 +1,10 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
@@ -15,7 +21,11 @@ export class AuthController {
     @Body('username') username: string,
     @Body('password') password: string,
   ) {
-    return this.authService.register(username, password);
+    try {
+      return await this.authService.register(username, password);
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Registration failed.');
+    }
   }
 
   @ApiBody({
@@ -26,10 +36,14 @@ export class AuthController {
     @Body('username') username: string,
     @Body('password') password: string,
   ) {
-    const user = await this.authService.validateUser(username, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    try {
+      const user = await this.authService.validateUser(username, password);
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      return await this.authService.login(user);
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Login failed.');
     }
-    return this.authService.login(user);
   }
 }

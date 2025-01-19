@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -16,7 +16,11 @@ export class ArticleController {
     },
   })
   async processArticles(@Body('urls') urls: string[]): Promise<string> {
-    await this.articleService.processArticles(urls);
-    return 'Processing initiated. Check logs for details.';
+    try {
+      await this.articleService.processArticles(urls);
+      return 'Processing initiated. Check logs for details.';
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Processing failed.');
+    }
   }
 }
