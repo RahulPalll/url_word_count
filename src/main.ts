@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
+  console.log('JWT_SECRET:', process.env.JWT_SECRET); // Log the value
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
