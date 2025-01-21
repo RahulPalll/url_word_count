@@ -36,6 +36,11 @@ auth
   cleate files
   jwt-auth.guard.ts    &  jwt.strategy.ts
 
+
+fileupload
+
+npm install --save-dev @types/express @types/multer --legacy-peer-deps
+
 ### windows setup
 
 ### **1. Install Required Applications**
@@ -54,8 +59,7 @@ auth
 
 Here’s a step-by-step guide to set up your NestJS project with PostgreSQL and Swagger on your new Windows laptop:
 
-
-###  **Troubleshooting**
+### **Troubleshooting**
 
 **Node.js Version Mismatch** : If the project requires a specific Node.js version, use `nvm` (Node Version Manager):
 
