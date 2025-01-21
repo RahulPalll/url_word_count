@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ArticleModule } from './article/article.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { CatalogModule } from './catalog/catalog.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
     }),
     ArticleModule,
     AuthModule,
+    CatalogModule,
   ],
 })
 export class AppModule {
