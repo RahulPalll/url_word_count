@@ -5,6 +5,7 @@ import { ArticleModule } from './article/article.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { CatalogModule } from './catalog/catalog.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CatalogModule } from './catalog/catalog.module';
     ArticleModule,
     AuthModule,
     CatalogModule,
+    FileUploadModule,
   ],
 })
 export class AppModule {
